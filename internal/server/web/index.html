@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoDrop</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>SG-GoDrop</h1>
+            <p>Drop files here or click to choose</p>
+        </header>
+
+        <section id="connection-info">
+            <div class="info-box">
+                <span class="label">LAN URL:</span>
+                <span id="lan-url" class="url"></span>
+                <button id="copy-btn" class="btn-small">Copy Link</button>
+                <span id="copy-feedback" class="feedback"></span>
+            </div>
+            <div class="qr-box">
+                <img id="qr-image" src="/api/qr" alt="QR Code for connection URL">
+                <p>Scan with your phone camera</p>
+            </div>
+        </section>
+
+        <main>
+            <div id="drop-zone" class="drop-zone">
+                <div class="drop-content">
+                    <span>📁</span>
+                    <p>Drag &amp; drop files here</p>
+                    <p class="small">or</p>
+                    <button id="choose-btn" class="btn">Choose Files</button>
+                    <input type="file" id="file-input" multiple style="display:none">
+                </div>
+            </div>
+            <section id="transfer-list">
+                <h2>Transfers</h2>
+                <div id="transfers-container">
+                    <!-- Transfers rendered by JS -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer class="page-footer">
+        <span>sgPhilia</span>
+    </footer>
+
+    <script src="/app.js"></script>
+</body>
+</html>
