@@ -29,7 +29,7 @@ SG‑GoDrop is a lightweight local network file transfer system written in Go. I
 ### From source (requires Go 1.23+)
 
 ```bash
-git clone https://github.com/yourusername/SG-GoDrop.git
+git clone https://github.com/sgPhilia/SG-GoDrop
 cd SG-GoDrop
 go mod download
 go build -o godrop ./cmd/godrop
