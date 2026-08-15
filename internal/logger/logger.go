@@ -14,7 +14,6 @@ func New(w io.Writer, level slog.Level) *slog.Logger {
 	return slog.New(handler)
 }
 
-// Default returns a logger that writes to stdout at info level.
 func Default() *slog.Logger {
 	return New(os.Stdout, slog.LevelInfo)
 }

@@ -20,7 +20,6 @@ import (
 	"godrop/internal/transfer"
 )
 
-//go:embed web/*
 var webFS embed.FS
 
 type Server struct {
@@ -38,11 +37,6 @@ func New(cfg *config.Config, mgr *transfer.Manager, log *slog.Logger) *Server {
 		log: log,
 	}
 
-	// Remove the "web" prefix from the embedded filesystem.
-	//
-	// web/index.html -> index.html
-	// web/style.css  -> style.css
-	// web/app.js     -> app.js
 	webContent, err := fs.Sub(webFS, "web")
 	if err != nil {
 		panic(err)
@@ -50,10 +44,8 @@ func New(cfg *config.Config, mgr *transfer.Manager, log *slog.Logger) *Server {
 
 	mux := http.NewServeMux()
 
-	// Web UI
 	mux.Handle("/", http.FileServer(http.FS(webContent)))
 
-	// API
 	mux.HandleFunc("/api/upload", s.uploadHandler)
 	mux.HandleFunc("/api/transfers", s.transfersHandler)
 	mux.HandleFunc("/api/transfers/", s.transferHandler)
@@ -68,11 +60,9 @@ func New(cfg *config.Config, mgr *transfer.Manager, log *slog.Logger) *Server {
 	return s
 }
 
-// Start starts the HTTP server and logs addresses.
 func (s *Server) Start(ctx context.Context) error {
 	addrs := s.getLocalAddresses()
 
-	// Store the first LAN address for the QR code and API.
 	if len(addrs) > 0 {
 		s.lanURL = fmt.Sprintf(
 			"http://%s:%d",
@@ -106,12 +96,10 @@ func (s *Server) Start(ctx context.Context) error {
 	return nil
 }
 
-// Shutdown gracefully shuts down the server.
 func (s *Server) Shutdown(ctx context.Context) error {
 	return s.server.Shutdown(ctx)
 }
 
-// getLocalAddresses returns non-loopback IPv4 addresses.
 func (s *Server) getLocalAddresses() []string {
 	addrs := []string{}
 
@@ -143,7 +131,6 @@ func (s *Server) getLocalAddresses() []string {
 	return addrs
 }
 
-// uploadHandler handles multipart file upload.
 func (s *Server) uploadHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(
@@ -256,7 +243,6 @@ func (s *Server) uploadHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// transfersHandler lists all transfers.
 func (s *Server) transfersHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(
@@ -280,7 +266,6 @@ func (s *Server) transfersHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// transferHandler handles single transfer operations.
 func (s *Server) transferHandler(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimPrefix(
 		r.URL.Path,
@@ -303,13 +288,11 @@ func (s *Server) transferHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 
-		// GET /api/transfers/:id/download
 		if len(parts) == 2 && parts[1] == "download" {
 			s.downloadHandler(w, r, id)
 			return
 		}
 
-		// GET /api/transfers/:id
 		t, ok := s.mgr.GetTransfer(id)
 		if !ok {
 			http.Error(
@@ -330,7 +313,6 @@ func (s *Server) transferHandler(w http.ResponseWriter, r *http.Request) {
 
 	case http.MethodDelete:
 
-		// DELETE /api/transfers/:id
 		err := s.mgr.DeleteTransfer(id)
 		if err != nil {
 			http.Error(
@@ -353,7 +335,6 @@ func (s *Server) transferHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// downloadHandler serves the file for download.
 func (s *Server) downloadHandler(
 	w http.ResponseWriter,
 	r *http.Request,
@@ -431,7 +412,6 @@ func (s *Server) downloadHandler(
 	}
 }
 
-// infoHandler returns server connection information.
 func (s *Server) infoHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(
@@ -467,7 +447,6 @@ func (s *Server) infoHandler(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(resp)
 }
 
-// qrHandler generates a QR code containing the LAN URL.
 func (s *Server) qrHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(

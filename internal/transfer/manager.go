@@ -13,7 +13,6 @@ import (
 	"time"
 )
 
-// TransferStatus represents the state of a transfer.
 type TransferStatus string
 
 const (
@@ -25,7 +24,6 @@ const (
 	StatusDownloading TransferStatus = "downloading"
 )
 
-// Transfer holds metadata and progress.
 type Transfer struct {
 	ID        string        `json:"id"`
 	Name      string        `json:"name"`
@@ -39,7 +37,6 @@ type Transfer struct {
 	mu sync.RWMutex
 }
 
-// Manager coordinates all transfers.
 type Manager struct {
 	transfers map[string]*Transfer
 	mu        sync.RWMutex
@@ -47,7 +44,6 @@ type Manager struct {
 	log       *slog.Logger
 }
 
-// NewManager creates a new transfer manager and ensures the base directory exists.
 func NewManager(tempDir string, log *slog.Logger) (*Manager, error) {
 	base := filepath.Join(tempDir, "godrop")
 
@@ -62,7 +58,6 @@ func NewManager(tempDir string, log *slog.Logger) (*Manager, error) {
 	}, nil
 }
 
-// generateID creates a random hex string of length 16.
 func generateID() (string, error) {
 	b := make([]byte, 8)
 
@@ -73,7 +68,6 @@ func generateID() (string, error) {
 	return hex.EncodeToString(b), nil
 }
 
-// CreateTransfer initialises a new transfer and its storage directory.
 func (m *Manager) CreateTransfer(name string, size int64) (*Transfer, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -89,7 +83,6 @@ func (m *Manager) CreateTransfer(name string, size int64) (*Transfer, error) {
 		return nil, fmt.Errorf("failed to create transfer dir: %w", err)
 	}
 
-	// Prevent path traversal by using only the base filename.
 	safeName := filepath.Base(name)
 
 	if safeName == "." || safeName == string(filepath.Separator) || safeName == "" {
@@ -116,7 +109,6 @@ func (m *Manager) CreateTransfer(name string, size int64) (*Transfer, error) {
 	return t, nil
 }
 
-// GetTransfer returns a snapshot of a transfer by ID.
 func (m *Manager) GetTransfer(id string) (*Transfer, bool) {
 	m.mu.RLock()
 	t, ok := m.transfers[id]
@@ -143,7 +135,6 @@ func (m *Manager) GetTransfer(id string) (*Transfer, bool) {
 	return copy, true
 }
 
-// ListTransfers returns snapshots of all transfers.
 func (m *Manager) ListTransfers() []*Transfer {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
@@ -172,7 +163,6 @@ func (m *Manager) ListTransfers() []*Transfer {
 	return list
 }
 
-// DeleteTransfer removes a transfer and its files.
 func (m *Manager) DeleteTransfer(id string) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -191,7 +181,6 @@ func (m *Manager) DeleteTransfer(id string) error {
 	return nil
 }
 
-// UpdateProgress updates the progress for a transfer.
 func (m *Manager) UpdateProgress(id string, bytes int64) error {
 	m.mu.RLock()
 	t, ok := m.transfers[id]
@@ -210,7 +199,6 @@ func (m *Manager) UpdateProgress(id string, bytes int64) error {
 	return nil
 }
 
-// SetStatus updates the status of a transfer.
 func (m *Manager) SetStatus(id string, status TransferStatus) error {
 	m.mu.RLock()
 	t, ok := m.transfers[id]
@@ -229,7 +217,6 @@ func (m *Manager) SetStatus(id string, status TransferStatus) error {
 	return nil
 }
 
-// Cleanup removes all transfer directories.
 func (m *Manager) Cleanup() {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -256,8 +243,6 @@ func (m *Manager) Cleanup() {
 	_ = os.Remove(m.baseDir)
 }
 
-// SaveUploadedFile streams the uploaded content to disk.
-// It returns the final number of bytes written.
 func (m *Manager) SaveUploadedFile(id string, reader io.Reader) (int64, error) {
 	m.mu.RLock()
 	t, ok := m.transfers[id]

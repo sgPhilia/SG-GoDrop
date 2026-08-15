@@ -17,7 +17,6 @@ import (
 	"godrop/internal/transfer"
 )
 
-// Integration test: run a full server, upload and download a file.
 func TestIntegration_UploadDownload(t *testing.T) {
 	tmp := t.TempDir()
 	cfg := &config.Config{
@@ -34,11 +33,9 @@ func TestIntegration_UploadDownload(t *testing.T) {
 
 	srv := server.New(cfg, mgr, log)
 
-	// Start a test HTTP server
 	testServer := httptest.NewServer(srv.server.Handler)
 	defer testServer.Close()
 
-	// 1. Upload
 	fileContent := []byte("integration test content")
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
@@ -54,7 +51,6 @@ func TestIntegration_UploadDownload(t *testing.T) {
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("upload failed: %d", resp.StatusCode)
 	}
-	// parse id
 	var uploadResp map[string]interface{}
 	if err := json.NewDecoder(resp.Body).Decode(&uploadResp); err != nil {
 		t.Fatal(err)
@@ -64,8 +60,6 @@ func TestIntegration_UploadDownload(t *testing.T) {
 		t.Fatal("no id in response")
 	}
 
-	// 2. Wait for completion (or immediately since upload is synchronous)
-	// 3. Download
 	dlResp, err := http.Get(testServer.URL + "/api/transfers/" + id + "/download")
 	if err != nil {
 		t.Fatal(err)
@@ -82,7 +76,6 @@ func TestIntegration_UploadDownload(t *testing.T) {
 		t.Error("content mismatch")
 	}
 
-	// 4. Delete
 	req, _ := http.NewRequest(http.MethodDelete, testServer.URL+"/api/transfers/"+id, nil)
 	delResp, err := http.DefaultClient.Do(req)
 	if err != nil {

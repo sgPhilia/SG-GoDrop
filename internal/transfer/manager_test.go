@@ -72,13 +72,11 @@ func TestManager_ListTransfers(t *testing.T) {
 	mgr, _ := NewManager(t.TempDir(), logger.Default())
 	defer mgr.Cleanup()
 
-	// Initially empty
 	list := mgr.ListTransfers()
 	if len(list) != 0 {
 		t.Errorf("expected empty list, got %d", len(list))
 	}
 
-	// Add two
 	mgr.CreateTransfer("a", 1)
 	mgr.CreateTransfer("b", 2)
 	list = mgr.ListTransfers()
@@ -101,15 +99,12 @@ func TestManager_DeleteTransfer(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// directory should be removed
 	if _, err := os.Stat(dir); !os.IsNotExist(err) {
 		t.Error("directory still exists after delete")
 	}
-	// should not find it
 	if _, ok := mgr.GetTransfer(t1.ID); ok {
 		t.Error("transfer still present after delete")
 	}
-	// deleting again should fail
 	if err := mgr.DeleteTransfer(t1.ID); err == nil {
 		t.Error("expected error on double delete")
 	}
@@ -137,7 +132,6 @@ func TestManager_UpdateProgressAndStatus(t *testing.T) {
 		t.Errorf("expected status completed, got %v", got.Status)
 	}
 
-	// update on nonexistent
 	if err := mgr.UpdateProgress("bad", 0); err == nil {
 		t.Error("expected error on bad ID")
 	}
@@ -167,7 +161,6 @@ func TestManager_SaveUploadedFile(t *testing.T) {
 		t.Errorf("expected progress 1024, got %d", got.Progress)
 	}
 
-	// verify file content
 	content, err := os.ReadFile(t1.Path)
 	if err != nil {
 		t.Fatal(err)
@@ -180,16 +173,13 @@ func TestManager_SaveUploadedFile(t *testing.T) {
 func TestManager_Cleanup(t *testing.T) {
 	dir := t.TempDir()
 	mgr, _ := NewManager(dir, logger.Default())
-	// create a transfer
 	t1, _ := mgr.CreateTransfer("clean", 1)
-	// ensure directory exists
 	dirPath := filepath.Dir(t1.Path)
 	if _, err := os.Stat(dirPath); err != nil {
 		t.Fatal("transfer directory not created")
 	}
 
 	mgr.Cleanup()
-	// after cleanup, base dir should be removed
 	if _, err := os.Stat(filepath.Join(dir, "godrop")); !os.IsNotExist(err) {
 		t.Error("base godrop directory still exists after cleanup")
 	}
@@ -200,7 +190,6 @@ func TestManager_ConcurrentAccess(t *testing.T) {
 	defer mgr.Cleanup()
 
 	var wg sync.WaitGroup
-	// create 10 transfers concurrently
 	for i := 0; i < 10; i++ {
 		wg.Add(1)
 		go func(i int) {
@@ -215,7 +204,6 @@ func TestManager_ConcurrentAccess(t *testing.T) {
 		t.Errorf("expected 10 transfers, got %d", len(list))
 	}
 
-	// update progress concurrently
 	for _, t := range list {
 		wg.Add(1)
 		go func(id string) {
@@ -225,7 +213,6 @@ func TestManager_ConcurrentAccess(t *testing.T) {
 	}
 	wg.Wait()
 
-	// all should have progress 123
 	for _, t := range list {
 		got, _ := mgr.GetTransfer(t.ID)
 		if got.Progress != 123 {

@@ -10,7 +10,6 @@
     let pollInterval = null;
     let currentUrl = '';
 
-    // --- Fetch connection info ---
     async function fetchInfo() {
         try {
             const resp = await fetch('/api/info');
@@ -25,7 +24,6 @@
         }
     }
 
-    // --- Copy link ---
     if (copyBtn) {
         copyBtn.addEventListener('click', async () => {
             if (!currentUrl) {
@@ -37,7 +35,6 @@
                 copyFeedback.textContent = 'Copied!';
                 setTimeout(() => { copyFeedback.textContent = ''; }, 3000);
             } catch (err) {
-                // Fallback: prompt
                 const input = document.createElement('input');
                 input.value = currentUrl;
                 document.body.appendChild(input);
@@ -50,7 +47,6 @@
         });
     }
 
-    // --- Fetch transfers ---
     async function fetchTransfers() {
         try {
             const resp = await fetch('/api/transfers');
@@ -124,7 +120,6 @@
         return div.innerHTML;
     }
 
-    // --- Upload ---
     async function uploadFiles(files) {
         for (const file of files) {
             const formData = new FormData();
@@ -147,7 +142,6 @@
         }
     }
 
-    // --- Drag and drop ---
     dropZone.addEventListener('dragover', (e) => {
         e.preventDefault();
         dropZone.classList.add('dragover');
@@ -181,7 +175,6 @@
         }
     });
 
-    // --- Initialisation ---
     fetchInfo();
     fetchTransfers();
     pollInterval = setInterval(fetchTransfers, 2000);

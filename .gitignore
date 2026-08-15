@@ -30,4 +30,4 @@ go.work.sum
 Thumbs.db
 
 # OS temp files
-/tmp/godrop/
+tmp/godrop/
