@@ -1,5 +1,5 @@
 # Binaries
-godrop
+/godrop
 *.exe
 *.exe~
 *.dll
