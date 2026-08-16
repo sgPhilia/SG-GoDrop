@@ -2,11 +2,9 @@ package server
 
 import (
 	"context"
-	"embed"
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/fs"
 	"log/slog"
 	"net"
 	"net/http"
@@ -17,10 +15,9 @@ import (
 	"github.com/skip2/go-qrcode"
 
 	"godrop/internal/config"
+	"godrop/internal/server/web"
 	"godrop/internal/transfer"
 )
-
-var webFS embed.FS
 
 type Server struct {
 	cfg    *config.Config
@@ -37,10 +34,7 @@ func New(cfg *config.Config, mgr *transfer.Manager, log *slog.Logger) *Server {
 		log: log,
 	}
 
-	webContent, err := fs.Sub(webFS, "web")
-	if err != nil {
-		panic(err)
-	}
+	webContent := web.FS()
 
 	mux := http.NewServeMux()
 
